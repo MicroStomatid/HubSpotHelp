@@ -1,0 +1,71 @@
+//Author: David Hills
+//Date: Dec 18, 2024
+//Purpose: rename tickets with insightful names
+
+
+const hubspot = require('@hubspot/api-client');
+const axios = require('axios');
+
+exports.main = async (event, callback) => {
+
+  
+const API_KEY = 'fixTickets';
+const hs_ticket_id = event.inputfields['hs_ticket_id']; // Replace with the ID of the ticket you want to fetch
+
+const url = `https://api.hubapi.com/crm/v3/objects/tickets/${hs_ticket_id}`;
+
+axios.get(url, {
+  headers: {
+    'Authorization': `Bearer ${API_KEY}`,
+    'Content-Type': 'application/json',
+  }
+})
+.then(response => {
+  console.log('Ticket details:', response.data);
+})
+.catch(error => {
+  console.error('Error fetching ticket:', error.response ? error.response.data : error.message);
+});
+
+//Pulling the string between text "Subject:" and "Priority" and passing that value to a constant 
+  
+const content = event.inputfields['content'];
+
+const matched = content.match(/Subject:\s*(.*?)\s*Priority:/);
+const subject = matched ? matched[1] : "Not Found";
+  
+//Update Request to HubSpot API
+  
+
+// Data to update the ticket
+const updateData = {
+  properties: {
+    
+    subject: subject, // Replace with the desired subject
+
+  },
+};
+
+axios.patch(url, updateData, {
+  headers: {
+    'Authorization': `Bearer ${API_KEY}`,
+    'Content-Type': 'application/json',
+  },
+})
+.then(response => {
+  console.log('Ticket updated successfully:', response.data);
+})
+.catch(error => {
+  console.error('Error updating ticket:', error.response ? error.response.data : error.message);
+});
+
+  /*****
+    Use the callback function to output data that can be used in later actions in your workflow.
+  *****/
+  callback({
+    outputFields: {
+      matched:matched,
+      subject:subject
+    }
+  });
+}

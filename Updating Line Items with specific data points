@@ -1,0 +1,34 @@
+//Author: David Hills
+//Date: January 30, 2025
+//Purpose: update line items with specific T/F fields so commissions be paid on qualifying units already sold.
+
+
+const hubspot = require('@hubspot/api-client');
+const hubspotClient = new hubspot.Client({ "accessToken": process.env.Update_LineItem_orDeal });
+
+exports.main = async (event, callback) => {
+  const is_aed = ['Yes'];
+  const record_id = event.inputFields ['record_id'];
+  const properties = {
+	"is_aed": is_aed
+  };
+
+  
+  const SimplePublicObjectInput = { properties };
+  
+  // update Line Item
+  try {
+    const apiResponse = await hubspotClient.crm.line_items.basicApi.update(record_id, SimplePublicObjectInput);
+    console.log(JSON.stringify(apiResponse, null, 2));
+  } catch (e) {
+    e.message === 'HTTP request failed'
+      ? console.error(JSON.stringify(e.response, null, 2))
+      : console.error(e)
+  }
+
+  callback({
+    outputFields: {
+		is_aed: is_aed
+    }
+  });
+}

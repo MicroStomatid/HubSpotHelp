@@ -8,7 +8,7 @@ const hubspotClient = new hubspot.Client({ "accessToken": process.env.Update_Lin
 
 exports.main = async (event, callback) => {
   const is_aed = ['Yes'];
-  const record_id = event.inputFields ['record_id'];
+  const lineItemID = event.inputFields ['record_id'];
   const properties = {
 	"is_aed": is_aed
   };
@@ -18,7 +18,7 @@ exports.main = async (event, callback) => {
   
   // update Line Item
   try {
-    const apiResponse = await hubspotClient.crm.line_items.basicApi.update(record_id, SimplePublicObjectInput);
+    const apiResponse = await hubspotClient.crm.lineItems.basicApi.update(lineItemID, SimplePublicObjectInput);
     console.log(JSON.stringify(apiResponse, null, 2));
   } catch (e) {
     e.message === 'HTTP request failed'
